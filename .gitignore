@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+dist-ssr/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Python cache & temp files
+__pycache__/
+*.pyc
+
+# Tool artifacts
+.playwright-mcp/
+.vercel/
