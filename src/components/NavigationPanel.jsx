@@ -332,7 +332,7 @@ export default function NavigationPanel({
                         מעקב כרונולוגי רב-שנתי (בדיקות OCT 2021–2026)
                       </h3>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                        12 נקודות זמן: עין ימין (ביקורת) מול עין שמאל (מטופלת)
+                        {medicalData.octTimeline ? medicalData.octTimeline.length : 13} נקודות זמן: עין ימין (ביקורת) מול עין שמאל (מטופלת)
                       </p>
                     </div>
                   </div>

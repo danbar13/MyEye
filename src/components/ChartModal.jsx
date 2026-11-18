@@ -172,7 +172,7 @@ export default function ChartModal({ isOpen, onClose }) {
                 <span>עין ימין (OD) - קו כתום:</span>
               </div>
               <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
-                יציבות פיזיולוגית מושלמת סביב <strong className="text-amber-700 dark:text-amber-300">275–282 µm</strong> לאורך 5 שנות המעקב. מהווה הוכחה מדעית שהפגיעה ממוקמת אך ורק בעין שמאל.
+                יציבות פיזיולוגית מושלמת סביב <strong className="text-amber-700 dark:text-amber-300">275–282 µm</strong> (במעקב 16/11: <strong className="text-amber-700 dark:text-amber-300">235 µm</strong>) לאורך 5 שנות המעקב. מהווה הוכחה מדעית שהפגיעה ממוקמת אך ורק בעין שמאל.
               </p>
             </div>
 
@@ -202,10 +202,10 @@ export default function ChartModal({ isOpen, onClose }) {
             <div className="p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-emerald-200/80 dark:border-emerald-900/60 shadow-sm hover:border-emerald-400 transition-colors">
               <div className="flex items-center gap-1.5 mb-1 text-emerald-700 dark:text-emerald-400 font-extrabold text-[12px]">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block flex-shrink-0"></span>
-                <span>ניתוח קטרקט משולב (2026):</span>
+                <span>ניתוח קטרקט ומעקב 16/11:</span>
               </div>
               <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
-                החלפת העדשה (Phaco + PCIOL) לוותה בשתל אוזורדקס מגן מראש (<strong className="text-emerald-700 dark:text-emerald-300">Protective Implant</strong>) למניעת התלקחות בצקת CME.
+                החלפת העדשה לוותה בשתל אוזורדקס מגן. ב-OCT מ-16/11/2026 (שבועיים מהניתוח) נמנעה התלקחות דלקתית חריפה (<strong className="text-emerald-700 dark:text-emerald-300">543 µm</strong>) תוך שמירה על עין ימין בריאה (<strong className="text-emerald-700 dark:text-emerald-300">235 µm</strong>).
               </p>
             </div>
           </div>
