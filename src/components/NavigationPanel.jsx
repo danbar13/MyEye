@@ -19,16 +19,29 @@ import {
   Calendar,
   ArrowLeftRight,
   Lightbulb,
-  CheckCircle2
+  CheckCircle2,
+  BookOpen
 } from 'lucide-react';
 import medicalData from '../data/medicalContent.json';
+import GlossaryText from './GlossaryText';
+import GlossaryView from './GlossaryView';
 
 const TAB_ICONS = {
   Eye: Eye,
   AlertTriangle: AlertTriangle,
   Syringe: Syringe,
   Sparkles: Sparkles,
-  HelpCircle: HelpCircle
+  HelpCircle: HelpCircle,
+  BookOpen: BookOpen
+};
+
+const TAB_SHORT_LABELS = {
+  'anatomy': 'אנטומיה',
+  'retina-issue': 'רשתית',
+  'treatments': 'טיפולים',
+  'cataract': 'קטרקט',
+  'future-treatments': 'נוספים',
+  'glossary': 'מילון'
 };
 
 export default function NavigationPanel({
@@ -54,7 +67,6 @@ export default function NavigationPanel({
   const currentTabData = medicalData.tabs.find(t => t.id === activeTab) || medicalData.tabs[0];
   const [expandedTreatment, setExpandedTreatment] = useState('eylea-hd');
   const [isTableExpanded, setIsTableExpanded] = useState(true);
-  const [expandedTakeaway, setExpandedTakeaway] = useState(null);
   const selectedPartData = selectedPart ? (medicalData.anatomyParts[selectedPart] || (selectedPart === 'Fovea' ? medicalData.anatomyParts['Fovea'] : null)) : null;
 
   const toggleAccordion = (id, targetFocus) => {
@@ -65,10 +77,10 @@ export default function NavigationPanel({
   };
 
   return (
-    <aside className="h-full flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-colors">
+    <aside className="h-full flex flex-col bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-colors">
       
-      {/* 5 Tabs Navigation Bar */}
-      <nav className="grid grid-cols-5 p-1.5 gap-1 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800">
+      {/* 6 Tabs Navigation Bar */}
+      <nav className="grid grid-cols-6 p-1.5 gap-1 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
         {medicalData.tabs.map((tab) => {
           const IconComponent = TAB_ICONS[tab.icon] || Eye;
           const isActive = activeTab === tab.id;
@@ -76,16 +88,16 @@ export default function NavigationPanel({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-bold transition-all ${
+              className={`flex flex-col items-center justify-center py-2 px-0.5 rounded-lg text-xs font-bold transition-all ${
                 isActive
                   ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm border-b-2 border-sky-500'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
               }`}
               title={tab.title}
             >
-              <IconComponent className={`w-4 h-4 mb-1 ${isActive ? 'scale-110' : ''}`} />
+              <IconComponent className={`w-4 h-4 mb-1 ${isActive ? 'scale-110 text-sky-600 dark:text-sky-400' : ''}`} />
               <span className="truncate max-w-full text-[10px] leading-tight">
-                {tab.id === 'future-treatments' ? 'נוספים' : tab.title.split(' ')[0]}
+                {TAB_SHORT_LABELS[tab.id] || tab.title.split(' ')[0]}
               </span>
             </button>
           );
@@ -116,18 +128,18 @@ export default function NavigationPanel({
 
             <div className="text-[11px] font-bold text-sky-700 dark:text-sky-300 mb-1.5 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5" />
-              <span>תפקיד פיזיולוגי: {selectedPartData.role}</span>
+              <span>תפקיד פיזיולוגי: <GlossaryText text={selectedPartData.role} /></span>
             </div>
 
             <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mb-2">
-              {selectedPartData.description}
+              <GlossaryText text={selectedPartData.description} />
             </p>
 
             <div className="p-2.5 rounded-lg bg-white/80 dark:bg-slate-900/80 border border-sky-100 dark:border-slate-700/80 text-[11px] leading-relaxed text-slate-800 dark:text-slate-200">
               <strong className="text-sky-800 dark:text-sky-300 block mb-0.5 font-bold">
                 ⚕️ השפעה קלינית וקשר למצבך:
               </strong>
-              {selectedPartData.clinicalImpact}
+              <GlossaryText text={selectedPartData.clinicalImpact} />
             </div>
           </div>
         )}
@@ -141,7 +153,7 @@ export default function NavigationPanel({
             {currentTabData.title}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            {currentTabData.summary}
+            <GlossaryText text={currentTabData.summary} />
           </p>
         </div>
         
@@ -153,7 +165,7 @@ export default function NavigationPanel({
               <span>איור אנטומי אינטראקטיבי:</span>
             </div>
             <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-              כל שכבות העין מוצגות באיור משמאל לימין לאורך ציר הראייה. לחץ על הנקודות הכחולות הפועמות על גבי האיור כדי לפתוח כאן כרטיס הסבר פיזיולוגי מקיף והשפעה קלינית ישירה על מצב העין שלך (BRVO, בצקת מקולרית, קטרקט ועוד).
+              <GlossaryText text="כל שכבות העין מוצגות באיור משמאל לימין לאורך ציר הראייה. לחץ על הנקודות הכחולות הפועמות על גבי האיור כדי לפתוח כאן כרטיס הסבר פיזיולוגי מקיף והשפעה קלינית ישירה על מצב העין שלך (BRVO, בצקת מקולרית, קטרקט ועוד)." />
             </p>
           </div>
         )}
@@ -256,10 +268,10 @@ export default function NavigationPanel({
                       <span className="text-emerald-600 dark:text-emerald-400 font-black">{currentTabData.comparisonHighlight.od.thickness}</span>
                     </div>
                     <div className="text-[10px] text-emerald-900 dark:text-emerald-200 leading-snug">
-                      <strong>פוביאה: </strong>{currentTabData.comparisonHighlight.od.fovea}
+                      <strong>פוביאה: </strong><GlossaryText text={currentTabData.comparisonHighlight.od.fovea} />
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-400 leading-snug">
-                      {currentTabData.comparisonHighlight.od.status}
+                      <GlossaryText text={currentTabData.comparisonHighlight.od.status} />
                     </div>
                   </div>
 
@@ -269,10 +281,10 @@ export default function NavigationPanel({
                       <span className="text-rose-600 dark:text-rose-400 font-black">{currentTabData.comparisonHighlight.os.thickness}</span>
                     </div>
                     <div className="text-[10px] text-rose-900 dark:text-rose-200 leading-snug">
-                      <strong>פוביאה: </strong>{currentTabData.comparisonHighlight.os.fovea}
+                      <strong>פוביאה: </strong><GlossaryText text={currentTabData.comparisonHighlight.os.fovea} />
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-400 leading-snug">
-                      {currentTabData.comparisonHighlight.os.status}
+                      <GlossaryText text={currentTabData.comparisonHighlight.os.status} />
                     </div>
                   </div>
                 </div>
@@ -364,14 +376,18 @@ export default function NavigationPanel({
                             </td>
                             <td className="py-2 px-2.5 align-top text-emerald-700 dark:text-emerald-400">
                               <span className="font-extrabold block text-xs">{row.odThickness}</span>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight block">{row.od}</span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight block">
+                                <GlossaryText text={row.od} />
+                              </span>
                             </td>
                             <td className="py-2 px-2.5 align-top text-rose-700 dark:text-rose-400">
                               <span className="font-extrabold block text-xs">{row.osThickness}</span>
-                              <span className="text-[10px] text-slate-600 dark:text-slate-300 leading-tight block">{row.os}</span>
+                              <span className="text-[10px] text-slate-600 dark:text-slate-300 leading-tight block">
+                                <GlossaryText text={row.os} />
+                              </span>
                             </td>
                             <td className="py-2 px-2.5 align-top text-slate-700 dark:text-slate-300 text-[10px] leading-relaxed">
-                              {row.significance}
+                              <GlossaryText text={row.significance} />
                             </td>
                           </tr>
                         ))}
@@ -405,7 +421,7 @@ export default function NavigationPanel({
                         <span>{takeaway.title}</span>
                       </div>
                       <p className="text-slate-700 dark:text-slate-300 text-[11px] pr-5">
-                        {takeaway.content}
+                        <GlossaryText text={takeaway.content} />
                       </p>
                     </div>
                   ))}
@@ -424,7 +440,7 @@ export default function NavigationPanel({
                 1. הדמיית הזרקה תוך-עינית (Intravitreal Injection):
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                מחט עדינה חודרת דרך ה-Pars Plana בלובן העין, משחררת תרופה לזגוגית, והבצקת נסוגה ומייבשת את נוזלי הרשתית.
+                <GlossaryText text="מחט עדינה חודרת דרך ה-Pars Plana בלובן העין, משחררת תרופה לזגוגית, והבצקת נסוגה ומייבשת את נוזלי הרשתית." />
               </p>
               <button
                 onClick={onTriggerInjection}
@@ -441,7 +457,7 @@ export default function NavigationPanel({
                 2. הדמיית צריבה בלייזר (Argon Laser Photocoagulation):
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                קרן לייזר ירוקה (532nm) חודרת דרך האישון ומבצעת צריבה ממוקדת באזורי הדלף ברשתית לעצירת ההפרשה.
+                <GlossaryText text="קרן לייזר ירוקה (532nm) חודרת דרך האישון ומבצעת צריבה ממוקדת באזורי הדלף ברשתית לעצירת ההפרשה." />
               </p>
               <button
                 onClick={onTriggerLaser}
@@ -519,7 +535,7 @@ export default function NavigationPanel({
               <Info className="w-5 h-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />
               <div className="leading-relaxed">
                 <span className="font-bold">לתשומת לב המטופל: </span>
-                {currentTabData.callout}
+                <GlossaryText text={currentTabData.callout} />
               </div>
             </div>
 
@@ -568,7 +584,7 @@ export default function NavigationPanel({
                             🔬 מנגנון הפעולה:
                           </span>
                           <p className="leading-relaxed text-[11px] text-slate-600 dark:text-slate-300">
-                            {treatment.mechanism}
+                            <GlossaryText text={treatment.mechanism} />
                           </p>
                         </div>
 
@@ -577,7 +593,7 @@ export default function NavigationPanel({
                             ✨ יתרונות פוטנציאליים:
                           </span>
                           <p className="leading-relaxed text-[11px] text-slate-600 dark:text-slate-300">
-                            {treatment.advantages}
+                            <GlossaryText text={treatment.advantages} />
                           </p>
                         </div>
 
@@ -586,7 +602,7 @@ export default function NavigationPanel({
                             ⚖️ שיקולים ומה לברר מול הרופא:
                           </span>
                           <p className="leading-relaxed text-[11px] text-amber-900 dark:text-amber-200">
-                            {treatment.considerations}
+                            <GlossaryText text={treatment.considerations} />
                           </p>
                         </div>
 
@@ -599,7 +615,7 @@ export default function NavigationPanel({
                               {treatment.questionsForDoctor.map((q, qIdx) => (
                                 <li key={qIdx} className="flex items-start gap-1 leading-snug">
                                   <span className="font-bold text-indigo-500 mt-0.5">•</span>
-                                  <span>{q}</span>
+                                  <span><GlossaryText text={q} /></span>
                                 </li>
                               ))}
                             </ul>
@@ -635,7 +651,7 @@ export default function NavigationPanel({
                         <span>{item.topic}</span>
                       </div>
                       <p className="text-slate-700 dark:text-slate-300 text-[11px] pr-5">
-                        {item.question}
+                        <GlossaryText text={item.question} />
                       </p>
                     </div>
                   ))}
@@ -644,6 +660,11 @@ export default function NavigationPanel({
             )}
 
           </div>
+        )}
+
+        {/* TAB 6: Dedicated Medical Glossary View */}
+        {activeTab === 'glossary' && (
+          <GlossaryView onSelectPart={onSelectPart} />
         )}
 
         {/* Clinical Metrics Grid (for Tabs 1 to 4) */}
@@ -673,7 +694,7 @@ export default function NavigationPanel({
                   {sec.heading}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {sec.content}
+                  <GlossaryText text={sec.content} />
                 </p>
               </div>
             ))}

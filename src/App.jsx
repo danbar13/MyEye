@@ -34,8 +34,8 @@ export default function App() {
   // OCT Longitudinal Chart Modal State
   const [isChartOpen, setIsChartOpen] = useState(false);
 
-  // Split-Pane Resizing State (25% to 75% range, default 36%)
-  const [panelWidthPercent, setPanelWidthPercent] = useState(36);
+  // Split-Pane Resizing State (25% to 75% range, default 38%)
+  const [panelWidthPercent, setPanelWidthPercent] = useState(38);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
   const splitContainerRef = useRef(null);
@@ -48,6 +48,15 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  // Jump to glossary tab when requested from inline term popovers
+  useEffect(() => {
+    const handleOpenGlossary = () => {
+      setActiveTab('glossary');
+    };
+    window.addEventListener('myeye-open-glossary', handleOpenGlossary);
+    return () => window.removeEventListener('myeye-open-glossary', handleOpenGlossary);
+  }, []);
 
   // Tab change handler
   const handleTabChange = (tabId) => {
@@ -134,7 +143,7 @@ export default function App() {
     document.body.style.userSelect = 'none';
   };
 
-  // Split-Pane Drag Listeners (RTL-aware, 25% to 75% per side)
+  // Split-Pane Drag Listeners (RTL-aware: Right = Text Panel, Left = Visual Canvas)
   useEffect(() => {
     const handleMove = (e) => {
       if (!isDraggingRef.current || !splitContainerRef.current) return;
@@ -146,9 +155,9 @@ export default function App() {
       const totalWidth = rect.width;
       if (totalWidth <= 0) return;
 
-      // In RTL layout, the learning text panel is on the LEFT side of the container
-      // Its width in px is from rect.left to the cursor clientX position:
-      const panelWidthPx = clientX - rect.left;
+      // In RTL layout with the text panel on the RIGHT:
+      // The text panel extends from cursor clientX to rect.right:
+      const panelWidthPx = rect.right - clientX;
       let newPercent = (panelWidthPx / totalWidth) * 100;
 
       // Allow resizing from 25% to 75% for each side
@@ -191,16 +200,82 @@ export default function App() {
         onOpenChart={() => setIsChartOpen(true)}
       />
 
-      {/* Main Responsive Split Layout: 3D Viewport on Right + Resizer + Navigation Panel on Left (RTL) */}
+      {/* Main Responsive Split Layout:
+          In RTL Desktop (md:flex-row):
+            1. Right (order-1): Learning & Navigation Text Panel
+            2. Center (order-2): Resizable Splitter Divider
+            3. Left (order-3): Visual Viewer (2D Anatomy / 3D Canvas)
+          In Mobile (flex-col):
+            1. Top (order-1): Visual Viewer
+            2. Bottom (order-2): Learning & Navigation Text Panel
+      */}
       <div
         ref={splitContainerRef}
         className="flex-1 flex flex-col md:flex-row overflow-hidden relative select-none w-full"
       >
         
-        {/* Main Viewer Area: Tab 1 (2D Interactive Medical Illustration) vs Tabs 2-4 (3D Eye Simulation & Exploded View) */}
+        {/* 1. Learning & Navigation Text Panel (RIGHT side in RTL Desktop) */}
+        <section
+          style={isDesktop ? { width: `${panelWidthPercent}%` } : undefined}
+          className="w-full md:w-auto flex-1 md:flex-initial md:h-full min-h-0 z-10 relative overflow-hidden transition-none flex flex-col order-2 md:order-1"
+        >
+          <NavigationPanel
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            selectedPart={selectedPart}
+            onSelectPart={setSelectedPart}
+            isSwollen={isSwollen}
+            octThickness={octThickness}
+            onSetOctThickness={handleSetOctThickness}
+            onToggleEdemaMode={handleToggleEdemaMode}
+            onToggleEdema={() => setIsSwollen(!isSwollen)}
+            onTriggerInjection={handleTriggerInjection}
+            isInjecting={isInjecting}
+            onTriggerLaser={handleTriggerLaser}
+            isLasering={isLasering}
+            cataractMode={cataractMode}
+            onSetCataractMode={setCataractMode}
+            onPerformCataractSurgery={handlePerformCataractSurgery}
+            onFocusTreatment={(focusPart) => setSelectedPart(focusPart)}
+            onOpenChart={() => setIsChartOpen(true)}
+          />
+
+          {isDragging && <div className="absolute inset-0 z-50 cursor-col-resize pointer-events-auto" />}
+        </section>
+
+        {/* 2. Draggable Split-Screen Resizer Divider Handle (Middle, Desktop/Tablet) */}
+        <div
+          onMouseDown={handleStartDrag}
+          onTouchStart={handleStartDrag}
+          className={`hidden md:flex items-center justify-center w-3 -mx-1.5 cursor-col-resize z-40 select-none group relative bg-transparent touch-none md:order-2 ${
+            isDragging ? 'bg-sky-500/15' : 'hover:bg-sky-500/10'
+          }`}
+          title="לחץ וגרור ימינה/שמאלה לשינוי גודל חלון הקריאה או תצוגת התלת-ממד (25% עד 75%)"
+          role="separator"
+          aria-orientation="vertical"
+          aria-valuenow={panelWidthPercent}
+          aria-valuemin={25}
+          aria-valuemax={75}
+        >
+          {/* Vertical divider line and grip indicator */}
+          <div className={`w-[3px] h-full transition-colors relative flex items-center justify-center ${
+            isDragging ? 'bg-sky-500' : 'bg-slate-200 dark:bg-slate-800 group-hover:bg-sky-400'
+          }`}>
+            <div className={`w-3.5 h-10 rounded-full border shadow-md flex items-center justify-center gap-0.5 pointer-events-none transition-all ${
+              isDragging
+                ? 'bg-sky-600 border-sky-400 shadow-sky-500/40 text-white scale-105'
+                : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 group-hover:border-sky-400'
+            }`}>
+              <span className={`w-0.5 h-4 rounded-full ${isDragging ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500 group-hover:bg-sky-400'}`}></span>
+              <span className={`w-0.5 h-4 rounded-full ${isDragging ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500 group-hover:bg-sky-400'}`}></span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Visual Viewer Area (LEFT side in RTL Desktop): 2D Interactive Diagram or 3D Eye Canvas */}
         <main
           style={isDesktop ? { width: `${100 - panelWidthPercent}%` } : undefined}
-          className="w-full md:w-auto h-[44vh] sm:h-[48vh] md:h-full min-w-0 relative bg-slate-100/60 dark:bg-[#070a12] transition-none flex-shrink-0 md:flex-shrink md:flex-grow overflow-hidden flex items-center justify-center"
+          className="w-full md:w-auto h-[44vh] sm:h-[48vh] md:h-full min-w-0 relative bg-slate-100/60 dark:bg-[#070a12] transition-none flex-shrink-0 md:flex-shrink md:flex-grow overflow-hidden flex items-center justify-center order-1 md:order-3"
         >
           {activeTab === 'anatomy' ? (
             <AnatomyImageViewer
@@ -228,59 +303,6 @@ export default function App() {
           {/* Mouse overlay during drag to prevent viewport from capturing pointer events */}
           {isDragging && <div className="absolute inset-0 z-50 cursor-col-resize pointer-events-auto" />}
         </main>
-
-        {/* Resizable Splitter Divider Bar (Hidden on Mobile, Draggable on Tablet & Desktop) */}
-        <div
-          onMouseDown={handleStartDrag}
-          onTouchStart={handleStartDrag}
-          className={`hidden md:flex items-center justify-center w-4 -mx-2 cursor-col-resize z-40 select-none group relative bg-transparent touch-none ${
-            isDragging ? 'bg-sky-500/15' : 'hover:bg-sky-500/10'
-          }`}
-          title="לחץ וגרור ימינה/שמאלה להסטת גודל המסך (25% עד 75%)"
-        >
-          {/* Vertical divider line and grip indicator */}
-          <div className={`w-[3px] h-full transition-colors relative flex items-center justify-center ${
-            isDragging ? 'bg-sky-500' : 'bg-slate-200 dark:bg-slate-800 group-hover:bg-sky-400'
-          }`}>
-            <div className={`w-4 h-10 rounded-full border shadow-md flex items-center justify-center gap-0.5 pointer-events-none transition-colors ${
-              isDragging
-                ? 'bg-sky-600 border-sky-400 shadow-sky-500/40 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 group-hover:border-sky-400'
-            }`}>
-              <span className={`w-0.5 h-4 rounded-full ${isDragging ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500 group-hover:bg-sky-400'}`}></span>
-              <span className={`w-0.5 h-4 rounded-full ${isDragging ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500 group-hover:bg-sky-400'}`}></span>
-            </div>
-          </div>
-        </div>
-
-        {/* Learning & Navigation Text Panel */}
-        <section
-          style={isDesktop ? { width: `${panelWidthPercent}%` } : undefined}
-          className="w-full md:w-auto flex-1 md:flex-initial md:h-full min-h-0 z-10 relative overflow-hidden transition-none flex flex-col"
-        >
-          <NavigationPanel
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            selectedPart={selectedPart}
-            onSelectPart={setSelectedPart}
-            isSwollen={isSwollen}
-            octThickness={octThickness}
-            onSetOctThickness={handleSetOctThickness}
-            onToggleEdemaMode={handleToggleEdemaMode}
-            onToggleEdema={() => setIsSwollen(!isSwollen)}
-            onTriggerInjection={handleTriggerInjection}
-            isInjecting={isInjecting}
-            onTriggerLaser={handleTriggerLaser}
-            isLasering={isLasering}
-            cataractMode={cataractMode}
-            onSetCataractMode={setCataractMode}
-            onPerformCataractSurgery={handlePerformCataractSurgery}
-            onFocusTreatment={(focusPart) => setSelectedPart(focusPart)}
-            onOpenChart={() => setIsChartOpen(true)}
-          />
-
-          {isDragging && <div className="absolute inset-0 z-50 cursor-col-resize pointer-events-auto" />}
-        </section>
 
       </div>
 
